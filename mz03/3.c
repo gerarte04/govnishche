@@ -10,12 +10,16 @@ main(int argc, char **argv)
     errno = 0;
 
     double course = strtod(argv[1], &buf);
+    int i;
 
-    if (*buf || errno || buf == argv[1] || (double) course != course) {
-        return 0;
+    for (i = 2; *buf || errno || buf == argv[1] || (double) course != course; i++) {
+        errno = 0;
+        buf = NULL;
+
+        course = strtod(argv[i], &buf);
     }
 
-    for (int i = 2; i < argc; i++) {
+    for (; i < argc; i++) {
         buf = NULL;
         errno = 0;
 

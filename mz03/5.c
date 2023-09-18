@@ -41,7 +41,7 @@ dup_elem(struct Elem *head)
         errno = 0;
         n = strtol(elem->next->str, &buf, 10);
 
-        if (!(*buf || errno || buf == elem->next->str || (int) n != n)) {
+        if (!(*buf || errno || buf == elem->next->str || (int) n != n || (int) (n + 1) < n + 1)) {
             errno = 0;
             struct Elem *new_elem = malloc(sizeof(struct Elem));
             new_elem->str = malloc(MAX_BUF);
