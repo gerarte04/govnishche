@@ -1,22 +1,20 @@
-enum
-{
-    MY_INT_MAX = 2147483647,
-    MY_INT_MIN = -2147483648
-};
 
 int
 satsum(int v1, int v2)
 {
-    int r = v1 + v2;
-    int temp;
+    enum
+    {
+        MY_INT_MAX = (int) ((unsigned) ~0 >> !0),
+        MY_INT_MIN = (int) ~((unsigned) ~0 >> !0)
+    };
 
-    if (__builtin_add_overflow(v1, v2, &temp)) {
-        if (v1 > 0) {
-            r = MY_INT_MAX;
-        } else {
-            r = MY_INT_MIN;
-        }
+    if (v1 > 0 && v2 > MY_INT_MAX - v1) {
+        return MY_INT_MAX;
     }
 
-    return r;
+    if (v1 < 0 && v2 < MY_INT_MIN - v1) {
+        return MY_INT_MIN;
+    }
+
+    return v1 + v2;
 }
