@@ -21,13 +21,13 @@ main(void)
 {
     int n;
 
-    if (scanf("%d", &n) == EOF) {
-        printf("error: input value is not read\n");
+    if (scanf("%d", &n) != 1) {
+        printf("input error\n");
         return 0;
     }
 
     if (n < MIN_N || n > MAX_N) {
-        printf("error: incorrect input value\n");
+        printf("incorrect input value\n");
         return 0;
     }
 

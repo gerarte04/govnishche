@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 enum
 {
@@ -23,29 +24,31 @@ dup_elem(struct Elem *head)
     struct Elem *new_head = head;
     struct Elem *elem = new_head;
 
-    char *buf = NULL;
+    char *end = NULL;
+    char *buf = calloc(MAX_BUF, sizeof(*buf));
     errno = 0;
 
-    long n = strtol(head->str, &buf, 10);
+    long n = strtol(head->str, &end, 10);
 
-    if (!(*buf || errno || buf == head->str || (int) n != n)) {
-        new_head = malloc(sizeof(struct Elem));
-        new_head->str = malloc(MAX_BUF);
-        snprintf(new_head->str, MAX_BUF, "%d", (int) (n + 1));
+    if (!(*end || errno || end == head->str || (int) n != n)) {
+        new_head = calloc(1, sizeof(*new_head));
+        snprintf(buf, MAX_BUF, "%d", (int) (n + 1));
+        new_head->str = strdup(buf);
+
         new_head->next = head;
         elem = head;
     }
 
     while (elem->next) {
-        buf = NULL;
+        end = NULL;
         errno = 0;
-        n = strtol(elem->next->str, &buf, 10);
+        n = strtol(elem->next->str, &end, 10);
 
-        if (!(*buf || errno || buf == elem->next->str || (int) n != n || (int) (n + 1) < n + 1)) {
-            errno = 0;
-            struct Elem *new_elem = malloc(sizeof(struct Elem));
-            new_elem->str = malloc(MAX_BUF);
-            snprintf(new_elem->str, MAX_BUF, "%d", (int) (n + 1));
+        if (!(*end || errno || end == elem->next->str || (int) n != n || (int) (n + 1) < n + 1)) {
+            struct Elem *new_elem = calloc(1, sizeof(*new_elem));
+            snprintf(buf, MAX_BUF, "%d", (int) (n + 1));
+            new_elem->str = strdup(buf);
+
             new_elem->next = elem->next;
             elem->next = new_elem;
             elem = elem->next;
@@ -53,6 +56,8 @@ dup_elem(struct Elem *head)
 
         elem = elem->next;
     }
+
+    free(buf);
 
     return new_head;
 }

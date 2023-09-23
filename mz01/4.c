@@ -28,5 +28,5 @@ comp(const void *x, const void *y)
 void
 sort_even_odd(size_t count, int *data)
 {
-    qsort(data, count, sizeof(int), comp);
+    qsort(data, count, sizeof(*data), comp);
 }

@@ -3,13 +3,19 @@
 #include <stdlib.h>
 #include <math.h>
 
+enum
+{
+    ROUND_COEF = 10000, // на коэфф-т домножается курс для того, чтобы округлять его при помощи round
+    PERCENT = 100       // для перевода из процентов в доли
+};
+
 int
 main(int argc, char **argv)
 {
     char *buf = NULL;
     errno = 0;
 
-    double course = round(strtod(argv[1], &buf) * 10000);
+    double course = round(strtod(argv[1], &buf) * ROUND_COEF);
 
     if (*buf || errno || buf == argv[1]) {
         return 1;
@@ -19,17 +25,17 @@ main(int argc, char **argv)
         buf = NULL;
         errno = 0;
 
-        double a = strtod(argv[i], &buf);
+        double change = strtod(argv[i], &buf);
 
         if (*buf || errno || buf == argv[i]) {
             return 1;
         }
 
-        course += course * a / 100;
+        course += course * change / PERCENT;
         course = round(course);
     }
 
-    printf("%0.4lf\n", course / 10000);
+    printf("%0.4lf\n", course / ROUND_COEF);
 
     return 0;
 }
