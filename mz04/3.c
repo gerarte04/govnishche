@@ -1,49 +1,40 @@
-#include <errno.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-struct Node
-{
-    int32_t key;
-    int32_t left_idx;
-    int32_t right_idx;
-};
-
-void
-print_dec(int f, int idx)
-{
-    struct Node *cur = calloc(1, sizeof(*cur));
-
-    lseek(f, sizeof(*cur) * idx, SEEK_SET);
-    int log = read(f, cur, sizeof(*cur));
-    
-    if (log != sizeof(*cur)) {
-        return;
-    }
-
-    if (cur->right_idx) {
-        print_dec(f, cur->right_idx);
-    }
-
-    printf("%d ", cur->key);
-
-    if (cur->left_idx) {
-        print_dec(f, cur->left_idx);
-    }
-
-    free(cur);
-}
+#include <stdio.h>
 
 int
 main(int argc, char **argv)
 {
-    int f = open(argv[1], O_RDONLY);
-    print_dec(f, 0);
-    printf("\n");
+    long long n_min;
+    int off_min = 0;
+    long long n;
+    int off = 0;
+
+    int f;
+
+    if ((f = open(argv[1], O_RDWR)) == -1) {
+        return 0;
+    }
+
+    if (read(f, &n_min, sizeof(n_min)) < sizeof(n_min)) {
+        close(f);
+        return 0;
+    }
+
+    while (read(f, &n, sizeof(n)) == sizeof(n)) {
+        off++;
+
+        if (n < n_min) {
+            n_min = n;
+            off_min = off;
+        }
+    }
+
+    n_min = -n_min;
+    lseek(f, off_min * sizeof(n_min), SEEK_SET);
+    write(f, &n_min, sizeof(n_min));
     close(f);
 
     return 0;

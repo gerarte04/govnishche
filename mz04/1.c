@@ -18,7 +18,7 @@ main(int argc, char **argv)
 {
     unsigned int n;
     unsigned char buf[BUF_SZ];
-    
+
     int f = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC, 0600);
 
     while (scanf("%u", &n) == 1) {

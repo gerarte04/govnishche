@@ -18,6 +18,12 @@ main(int argc, char **argv)
     int fr = open(argv[1], O_RDONLY);
     int fw = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0777);
 
+    if (fr == -1 || fw == -1) {
+        close(fr);
+        close(fw);
+        return 0;
+    }
+
     unsigned char c;
 
     for (int i = 0; read(fr, &c, sizeof(c)) > 0; i++) {
@@ -25,15 +31,20 @@ main(int argc, char **argv)
 
         for (int j = 1; j <= CHAR_BIT; j++) {
             int x = j + off;
-            sum += x * x;
+            sum = (sum % mod + (x * x) % mod) % mod;
 
             if (c & 1) {
-                int wr = sum % mod;
-                write(fw, &wr, sizeof(wr));
+                int k = write(fw, &sum, sizeof(sum));
+
+                if (k != sizeof(sum)) {
+                    write(fw, &sum + k, sizeof(sum) - k);
+                }
             }
 
             c >>= 1;
         }
+
+        c = 0;
     }
 
     close(fr);
