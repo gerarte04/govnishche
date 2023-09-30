@@ -1,43 +1,37 @@
+#include <errno.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-enum
-{
-    CHAR_BIT = 8
-};
-
 int
 main(int argc, char **argv)
 {
     char *buf = NULL;
+    errno = 0;
     int sum = 0;
-    int mod = (int) strtol(argv[3], &buf, 10);
+    long m = strtol(argv[3], &buf, 10);
 
-    int fr = open(argv[1], O_RDONLY);
-    int fw = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0777);
-
-    if (fr == -1 || fw == -1) {
-        close(fr);
-        close(fw);
+    if (errno || *buf || buf == argv[3] || (int) m != m || m == 0) {
         return 0;
     }
 
+    int mod = (int) m;
+    int fr = open(argv[1], O_RDONLY);
+    int fw = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+
     unsigned char c;
+    long long x = 0;
 
-    for (int i = 0; read(fr, &c, sizeof(c)) > 0; i++) {
-        int off = i * sizeof(c);
-
+    for (int i = 0; read(fr, &c, sizeof(c)) == sizeof(c); i++) {
         for (int j = 1; j <= CHAR_BIT; j++) {
-            int x = j + off;
+            x++;
             sum = (sum % mod + (x * x) % mod) % mod;
 
             if (c & 1) {
-                int k = write(fw, &sum, sizeof(sum));
-
-                if (k != sizeof(sum)) {
-                    write(fw, &sum + k, sizeof(sum) - k);
+                if (write(fw, &sum, sizeof(sum)) != sizeof(sum)) {
+                    return 1;
                 }
             }
 

@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdlib.h>
 #include <sys/file.h>
 #include <sys/stat.h>
@@ -8,9 +9,9 @@ int
 main(int argc, char **argv)
 {
     long long n_min;
-    int off_min = 0;
+    long long off_min = 0;
     long long n;
-    int off = 0;
+    long long off = 0;
 
     int f;
 
@@ -18,7 +19,7 @@ main(int argc, char **argv)
         return 0;
     }
 
-    if (read(f, &n_min, sizeof(n_min)) < sizeof(n_min)) {
+    if (read(f, &n_min, sizeof(n_min)) != sizeof(n_min)) {
         close(f);
         return 0;
     }
@@ -32,9 +33,15 @@ main(int argc, char **argv)
         }
     }
 
-    n_min = -n_min;
-    lseek(f, off_min * sizeof(n_min), SEEK_SET);
-    write(f, &n_min, sizeof(n_min));
+    if (n_min != LLONG_MIN) {
+        n_min = -n_min;
+        lseek(f, off_min * sizeof(n_min), SEEK_SET);
+
+        if (write(f, &n_min, sizeof(n_min)) != sizeof(n_min)) {
+            return 1;
+        }
+    }
+
     close(f);
 
     return 0;

@@ -12,7 +12,7 @@ main(int argc, char **argv)
     int n = (int) strtol(argv[2], &buf, 10);
 
     double a, b;
-    if (read(f, &a, sizeof(a)) <= 0) {
+    if (read(f, &a, sizeof(a)) != sizeof(a)) {
         close(f);
         return 0;
     }

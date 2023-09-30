@@ -10,9 +10,9 @@ struct stat
     ino_t st_ino;
     dev_t st_dev;
     mode_t st_mode;
-    // nlink_t st_nlink;
-    // uid_t st_uid;
-    // gid_t st_gid;
+    nlink_t st_nlink;
+    uid_t st_uid;
+    gid_t st_gid;
     size_t st_size;
 };
 
