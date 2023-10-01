@@ -10,7 +10,8 @@
 
 enum
 {
-    BUF_SIZE = 4096
+    BUF_SIZE = 4096,
+    MASK = 0777
 };
 
 int
@@ -51,7 +52,7 @@ copy_file(const char *srcpath, const char *dstpath)
             }
         }
 
-        if ((fdst = open(new_dest, O_WRONLY | O_CREAT | O_TRUNC, st_src.st_mode)) == -1) {
+        if ((fdst = open(new_dest, O_WRONLY | O_CREAT | O_TRUNC, st_src.st_mode & MASK)) == -1) {
             return -1;
         }
     } else {
@@ -59,7 +60,7 @@ copy_file(const char *srcpath, const char *dstpath)
             return 0;
         }
 
-        if ((fdst = open(dstpath, O_WRONLY | O_CREAT | O_TRUNC, st_src.st_mode)) == -1) {
+        if ((fdst = open(dstpath, O_WRONLY | O_CREAT | O_TRUNC, st_src.st_mode & MASK)) == -1) {
             return -1;
         }
     }
