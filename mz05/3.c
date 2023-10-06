@@ -8,7 +8,7 @@ parse_rwx_permissions(const char *str)
         return -1;
     }
 
-    char ex[] = "rwxrwxrwx";
+    const char ex[] = "rwxrwxrwx";
     int len = strlen(str);
     unsigned int mode = 0;
     int i;

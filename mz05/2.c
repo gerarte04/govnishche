@@ -2,11 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-enum
-{
-    MODE_LEN = 9
-};
-
 int
 main(int argc, char **argv)
 {
@@ -20,10 +15,11 @@ main(int argc, char **argv)
         }
 
         char str[] = "rwxrwxrwx";
+        int mode_len = (sizeof(str) - 1) / sizeof(str[0]);
 
-        for (int i = 0; i < MODE_LEN; i++) {
+        for (int i = 0; i < mode_len; i++) {
             if (!(mode & 1)) {
-                str[MODE_LEN - i - 1] = '-';
+                str[mode_len - i - 1] = '-';
             }
 
             mode >>= 1;

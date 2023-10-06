@@ -17,11 +17,7 @@ main(int argc, char **argv)
     for (int i = 1; i < argc; i++) {
         struct stat buf;
 
-        if (lstat(argv[i], &buf) != 0) {
-            continue;
-        }
-
-        if (buf.st_size % KIB == 0 && S_ISREG(buf.st_mode) && buf.st_nlink == 1) {
+        if (lstat(argv[i], &buf) == 0 && buf.st_size % KIB == 0 && S_ISREG(buf.st_mode) && buf.st_nlink == 1) {
             sum += buf.st_size;
         }
     }
