@@ -23,12 +23,12 @@ main(void)
 
     if (scanf("%d", &n) != 1) {
         printf("input error\n");
-        return 0;
+        return 1;
     }
 
     if (n < MIN_N || n > MAX_N) {
         printf("incorrect input value\n");
-        return 0;
+        return 1;
     }
 
     int arr[MAX_N];
