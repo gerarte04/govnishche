@@ -31,7 +31,7 @@ void f2(int argc, char **argv)
     DIR *d = opendir(argv[1]);
     struct dirent *dd;
 
-    while (dd = readdir(d)) {
+    while ((dd = readdir(d)) != NULL) {
         char buf[PATH_MAX + 1];
         snprintf(buf, PATH_MAX, "%s/%s", argv[1], dd->d_name);
 

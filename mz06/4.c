@@ -13,7 +13,8 @@ enum
     MAX_DEPTH = 4
 };
 
-void print_files(char *abs, char *rel, off_t max_size, int depth)
+void
+print_files(char *abs, char *rel, off_t max_size, int depth)
 {
     DIR *dir;
 
@@ -24,18 +25,18 @@ void print_files(char *abs, char *rel, off_t max_size, int depth)
     struct dirent *dd;
     char *fmt_str = (rel[0] == '\0') ? "%s%s" : "%s/%s";
 
-    while (dd = readdir(dir)) {
+    while ((dd = readdir(dir)) != NULL) {
         char buf_dd[PATH_MAX + 1];
         snprintf(buf_dd, PATH_MAX, "%s/%s", abs, dd->d_name);
 
         struct stat s;
+        int check_dir = (strcmp(dd->d_name, ".") != 0 && strcmp(dd->d_name, "..") != 0);
 
         if (lstat(buf_dd, &s) == 0) {
             if (S_ISREG(s.st_mode) && access(buf_dd, R_OK) == 0 && s.st_size <= max_size) {
                 printf(fmt_str, rel, dd->d_name);
                 putc('\n', stdout);
-            } else if (S_ISDIR(s.st_mode) && depth < MAX_DEPTH
-                && strcmp(dd->d_name, ".") != 0 && strcmp(dd->d_name, "..") != 0) {
+            } else if (S_ISDIR(s.st_mode) && depth < MAX_DEPTH && check_dir) {
                 char new_rel[PATH_MAX + 1];
                 snprintf(new_rel, PATH_MAX, fmt_str, rel, dd->d_name);
 
