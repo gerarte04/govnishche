@@ -10,16 +10,21 @@
 ssize_t
 getcwd2(int fd, char *buf, size_t size)
 {
+    DIR *start = opendir(".");
+
     if (fchdir(fd) == -1) {
-        return -1;
+        goto err;
     }
 
     struct stat s_fd;
     struct stat s_sl;
-    stat("/", &s_sl);
+
+    if (lstat("/", &s_sl) != 0) {
+        goto err;
+    }
 
     if (lstat(".", &s_fd) != 0) {
-        return -1;
+        goto err;
     }
 
     char *path = calloc(PATH_MAX + 1, sizeof(path[0]));
@@ -30,13 +35,14 @@ getcwd2(int fd, char *buf, size_t size)
         DIR *dir;
         struct dirent *dd;
 
-        if (!(dir = opendir("."))) {
-            return -1;
+        if ((dir = opendir(".")) == NULL) {
+            free(path);
+            goto err;
         }
 
         int found = 0;
 
-        while (dd = readdir(dir)) {
+        while ((dd = readdir(dir)) != NULL) {
             char buf_abs[PATH_MAX + 1];
             snprintf(buf_abs, PATH_MAX, "./%s", dd->d_name);
 
@@ -44,7 +50,7 @@ getcwd2(int fd, char *buf, size_t size)
 
             if (lstat(buf_abs, &s) == 0 && s.st_ino == s_fd.st_ino && s.st_dev == s_fd.st_dev) {
                 found = 1;
-                
+
                 char new_path[PATH_MAX + 1];
                 snprintf(new_path, PATH_MAX, "/%s%s", dd->d_name, path);
                 free(path);
@@ -57,9 +63,13 @@ getcwd2(int fd, char *buf, size_t size)
         closedir(dir);
 
         if (!found || lstat(".", &s_fd) != 0) {
-            return -1;
+            free(path);
+            goto err;
         }
     }
+
+    fchdir(dirfd(start));
+    closedir(start);
 
     if (*path == '\0') {
         *path = '/';
@@ -67,18 +77,13 @@ getcwd2(int fd, char *buf, size_t size)
     }
 
     snprintf(buf, size, "%s", path);
+    int len = strlen(path);
+    free(path);
 
-    return strlen(path);
-}
+    return len;
 
-int main(void)
-{
-    DIR *dir = opendir(".");
-
-    char buf[PATH_MAX + 1] = "\0";
-    int l = getcwd2(dirfd(dir), buf, 60);
-
-    printf("%d\n%s\n", l, buf);
-
-    return 0;
+err:
+    fchdir(dirfd(start));
+    closedir(start);
+    return -1;
 }
