@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+enum
+{
+    MODE_SZ = 10
+};
+
 int
 parse_rwx_permissions(const char *str)
 {
@@ -8,7 +13,7 @@ parse_rwx_permissions(const char *str)
         return -1;
     }
 
-    const char ex[] = "rwxrwxrwx";
+    const char ex[MODE_SZ] = "rwxrwxrwx";
     int len = strlen(str);
     unsigned int mode = 0;
     int i;
