@@ -14,7 +14,8 @@ read_str(int *len)
 {
     int c;
 
-    while ((c = getc(stdin)) == ' ' || c == '\n');
+    while ((c = getc(stdin)) == ' ' || c == '\n') {
+    }
 
     if (c == EOF) {
         *len = 0;
@@ -43,12 +44,19 @@ int
 main(void)
 {
     char *str;
-    int len;
+    int len = 0;
 
     while ((str = read_str(&len)) != NULL) {
         long long num = 0;
-        int n;
+        int n = 0;
         int err = 0;
+        int null_ch = 0;
+
+        printf("%s %d\n", str, len);
+
+        if (len == 0) {
+            continue;
+        }
 
         for (int i = 0; i < len; i++) {
             switch (str[i]) {
@@ -60,6 +68,15 @@ main(void)
                 break;
             case 'a':
                 n = -1;
+                break;
+            case '\0':
+                null_ch = 1;
+                break;
+            default:
+                err = 1;
+            }
+
+            if (err || null_ch) {
                 break;
             }
 

@@ -35,11 +35,11 @@ main(int argc, char **argv)
             struct dirent *dd2;
 
             while ((dd2 = readdir(d2)) != NULL) {
-                snprintf(buf, PATH_MAX, "%s/%s", argv[1], dd2->d_name);
+                snprintf(buf, PATH_MAX, "%s/%s", argv[2], dd2->d_name);
 
                 struct stat s2;
 
-                if (stat(buf, &s2) && s1.st_ino == s2.st_ino && s1.st_dev == s2.st_dev) {
+                if (stat(buf, &s2) == 0 && s1.st_ino == s2.st_ino && s1.st_dev == s2.st_dev) {
                     sum += s1.st_size;
                     break;
                 }

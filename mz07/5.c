@@ -8,7 +8,7 @@ enum
 {
     YR_OFF = 1900,
     YR_YDAY = 256,
-    
+
     FM_MDAY = 26,
     FM_MON = 5,
     FM_YEAR = 2021,
@@ -22,21 +22,6 @@ enum
     CNT_MONDAY = 4,
     DAY_WEEK = 7
 };
-
-void print_tm(struct tm time) {
-    printf("year(-1900) = %d\n", time.tm_year);
-    printf("mon[0:11] = %d\n", time.tm_mon);
-    printf("mday[1:31] = %d\n", time.tm_mday);
-    printf("hour[0:23] = %d\n", time.tm_hour);
-    printf("min[0:59] = %d\n", time.tm_min);
-    printf("sec[0:60] = %d\n", time.tm_sec);
-
-
-    printf("yday[0:365] = %d\n", time.tm_yday);
-    printf("wday[0:6] 0-sunday, 1-monday... = %d\n", time.tm_wday);
-    printf("tm_isdst = %d\n", time.tm_isdst);
-    printf("\n");
-}
 
 int
 main(void)
@@ -81,12 +66,10 @@ main(void)
         }
     }
 
-    // print_tm(full_moon);
-
     if (full_moon.tm_wday == 0) {
         full_moon.tm_mday -= DAY_WEEK;
     }
-    
+
     full_moon.tm_mday += CNT_MONDAY * DAY_WEEK;
     mktime(&full_moon);
 

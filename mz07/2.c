@@ -1,37 +1,56 @@
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <time.h>
+
+enum
+{
+    YR_OFF = 1900,
+    MON_CNT = 12,
+    THURS = 4,
+    DAY_WEEK = 7,
+    COEF2 = 2
+};
 
 int
-main(int argc, char **argv)
+main(void)
 {
-    long long res = 0;
-
-    for (int i = 1; i < argc; i++) {
-        char *buf = NULL;
-        errno = 0;
-        long n = strtol(argv[i], &buf, 10);
-
-        if (errno || buf == argv[i] || (int) n != n) {
-            continue;
-        }
-
-        if (buf[0] == 'k') {
-            if (__builtin_mul_overflow(n, 1000, &n)) {
-                continue;
-            }
-
-            buf++;
-        }
-
-        if (buf[0] == '+' && buf[1] == '\0') {
-            res += n;
-        } else if (buf[0] == '-' && buf[1] == '\0') {
-            res -= n;
-        }
+    int y;
+    if (scanf("%d", &y) != 1) {
+        return 1;
     }
 
-    printf("%lld\n", res);
+    struct tm tt;
+
+    for (int i = 0; i < MON_CNT; i++) {
+        memset(&tt, 0, sizeof(tt));
+        tt.tm_year = y - YR_OFF;
+        tt.tm_isdst = -1;
+        tt.tm_mday = 1;
+        tt.tm_mon = i;
+        mktime(&tt);
+
+        if (tt.tm_wday <= THURS) {
+            tt.tm_mday += THURS - tt.tm_wday;
+        } else {
+            tt.tm_mday += DAY_WEEK - (tt.tm_wday - THURS);
+        }
+
+        tt.tm_mday += DAY_WEEK;
+        mktime(&tt);
+
+        if (tt.tm_mday % 3 != 0) {
+            printf("%d %d\n", i + 1, tt.tm_mday);
+        }
+
+        tt.tm_mday += COEF2 * DAY_WEEK;
+        mktime(&tt);
+
+        if (tt.tm_mday % 3 != 0) {
+            printf("%d %d\n", i + 1, tt.tm_mday);
+        }
+    }
 
     return 0;
 }
