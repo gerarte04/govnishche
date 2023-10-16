@@ -1,96 +1,115 @@
-#include <limits.h>
-#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 enum
 {
-    BUF_SIZE = 4096,
-    MASK = 0777
+    BACK_LEN = 3
 };
 
-int
-copy_file(const char *srcpath, const char *dstpath)
+void
+normalize_path(char *buf)
 {
-    struct stat st_src;
-    struct stat st_dst;
+    char *str = buf;
+    char *ptr = buf;
 
-    if (access(srcpath, F_OK | R_OK) != 0 || stat(srcpath, &st_src) != 0) {
-        return -1;
+    while (buf[0] != '\0') {
+        if (buf[0] == '/') {
+            if (buf[1] == '.') {
+                if (buf[2] == '.' && (buf[3] == '/' || buf[3] == '\0')) {
+                    buf += 2;
+
+                    if (ptr != str) {
+                        do {
+                            ptr--;
+                        } while (ptr[0] != '/');
+                    }
+
+                    ptr--;
+                } else if (buf[2] == '/' || buf[2] == '\0') {
+                    buf++;
+                    ptr--;
+                }
+            }
+        }
+
+        ptr++;
+        buf++;
+        ptr[0] = buf[0];
     }
 
-    int fsrc;
-    int fdst;
-
-    int stat_code;
-
-    if ((stat_code = stat(dstpath, &st_dst)) == 0 && S_ISDIR(st_dst.st_mode)) {
-        const char *str = srcpath;
-        const char *last = str;
-
-        while (*str != '\0') {
-            if (*str == '/') {
-                last = str + 1;
-            }
-
-            str++;
-        }
-
-        char new_dest[PATH_MAX + 1];
-        snprintf(new_dest, PATH_MAX + 1, "%s/%s", dstpath, last);
-
-        struct stat st_new_dest;
-
-        if (stat(new_dest, &st_new_dest) == 0) {
-            if (st_src.st_ino == st_new_dest.st_ino && st_src.st_dev == st_new_dest.st_dev) {
-                return 0;
-            }
-        }
-
-        if ((fdst = open(new_dest, O_WRONLY | O_CREAT | O_TRUNC, st_src.st_mode & MASK)) == -1) {
-            return -1;
-        }
+    if (*(buf - 1) == '/') {
+        *(ptr - 1) = '\0';
     } else {
-        if (stat_code == 0 && st_src.st_ino == st_dst.st_ino && st_src.st_dev == st_dst.st_dev) {
-            return 0;
-        }
-
-        if ((fdst = open(dstpath, O_WRONLY | O_CREAT | O_TRUNC, st_src.st_mode & MASK)) == -1) {
-            return -1;
-        }
+        ptr[0] = '\0';
     }
 
-    if ((fsrc = open(srcpath, O_RDONLY)) == -1) {
-        return -1;
+    if (str[0] == '\0') {
+        str[0] = '/';
+        str[1] = '\0';
     }
-
-    unsigned char buf[BUF_SIZE];
-    int cnt_read;
-
-    while ((cnt_read = read(fsrc, buf, sizeof(buf[0]) * BUF_SIZE)) > 0) {
-        if (write(fdst, buf, sizeof(buf[0]) * cnt_read) == -1) {
-            return -1;
-        }
-    }
-
-    close(fsrc);
-    close(fdst);
-
-    return 0;
 }
 
-int main(void)
+char *
+relativize_path(const char *path1, const char *path2)
 {
-    if (copy_file("5.c", "/home/kingmidas/Desktop/fuck.c") == 0) {
-        printf("success\n");
-    } else {
-        printf("not success\n");
+    if (path1 == NULL || path2 == NULL) {
+        return NULL;
     }
 
-    return 0;
+    int size1 = strlen(path1) + 1;
+    int size2 = strlen(path2) + 1;
+
+    char path1_nrm[size1];
+    char path2_nrm[size2];
+
+    snprintf(path1_nrm, size1, "%s", path1);
+    snprintf(path2_nrm, size2, "%s", path2);
+
+    normalize_path(path1_nrm);
+    normalize_path(path2_nrm);
+
+    int i = 0;
+    int last_sl = 0;
+
+    while (path1_nrm[i] == path2_nrm[i] && path1_nrm[i] != '\0' && path2_nrm[i] != '\0') {
+        i++;
+
+        if (path1_nrm[i] == '/') {
+            last_sl = i;
+        }
+    }
+
+    int sl_cnt = 0;
+
+    for (i = last_sl + 1; path1_nrm[i] != '\0'; i++) {
+        if (path1_nrm[i] == '/') {
+            sl_cnt++;
+        }
+    }
+
+    int len2 = (path2_nrm[last_sl] != '\0') ? strlen(&path2_nrm[last_sl + 1]) : 0;
+    int rel_len = sl_cnt * BACK_LEN + len2;
+    char *rel_path = calloc(rel_len + 1, sizeof(*rel_path));
+
+    for (i = 0; i < BACK_LEN * sl_cnt; i += BACK_LEN) {
+        snprintf(&rel_path[i], BACK_LEN + 1, "../");
+    }
+
+    if (len2 > 0) {
+        snprintf(&rel_path[i], len2 + 1, "%s", &path2_nrm[last_sl + 1]);
+    }
+
+    if (rel_len > 0 && rel_path[rel_len - 1] == '/') {
+        rel_path[rel_len - 1] = '\0';
+    }
+
+    if (rel_path[0] == '\0') {
+        free(rel_path);
+        rel_path = calloc(2, sizeof(*rel_path));
+        rel_path[0] = '.';
+        rel_path[1] = '\0';
+    }
+
+    return rel_path;
 }
