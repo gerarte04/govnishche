@@ -1,33 +1,62 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-int main(void) {
-    int n;
-    scanf("%d", &n);
+enum
+{
+    MIN_N = 2,
+    MAX_N = 1999
+};
 
-    int **arr = calloc(n, sizeof(int *));
+int
+bin_exp(int a, int p, int n)
+{
+    int res = 1;
 
-    for (int i = 0; i < n; i++) {
-        arr[i] = calloc(n, sizeof(int));
-        arr[i][1] = i;
+    while (p != 0) {
+        if (p & 1) {
+            res = res * a % n;
+        }
+
+        a = a * a % n;
+        p >>= 1;
     }
 
-    for (int i = 2; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            arr[(j + arr[j][i - 1]) % n][i] = arr[j][i - 1];
+    return res;
+}
+
+int
+is_prime(int a)
+{
+    for (int i = 2; i * i <= a; i++) {
+        if (a % i == 0) {
+            return 0;
         }
     }
 
-    for (int i = 0; i < n; i++) {
-        for (int j = 1; j < n; j++) {
-            printf("%d ", arr[i][j]);
+    return 1;
+}
+
+int
+main(void)
+{
+    int n;
+
+    if (scanf("%d", &n) != 1) {
+        printf("input error\n");
+        return 1;
+    }
+
+    if (n < MIN_N || n > MAX_N || !is_prime(n)) {
+        printf("incorrect input value\n");
+        return 1;
+    }
+
+    for (int c = 0; c < n; c++) {
+        for (int a = 1; a < n; a++) {
+            printf("%d ", c * bin_exp(a, n - 2, n) % n);
         }
 
         printf("\n");
-        free(arr[i]);
     }
-
-    free(arr);
 
     return 0;
 }
