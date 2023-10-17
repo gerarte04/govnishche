@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -5,61 +6,31 @@
 
 enum
 {
-    START_CAP = 16,
     BASE = 3
 };
-
-char *
-read_str(int *len)
-{
-    int c;
-
-    while ((c = getc(stdin)) == ' ' || c == '\n') {
-    }
-
-    if (c == EOF) {
-        *len = 0;
-        return NULL;
-    }
-
-    *len = 1;
-    int cap = START_CAP;
-    char *str = malloc(cap * sizeof(str[0]));
-    str[0] = c;
-
-    while ((c = getc(stdin)) != ' ' && c != '\n') {
-        if (*len >= cap) {
-            cap *= 2;
-            str = realloc(str, cap * sizeof(str[0]));
-        }
-
-        str[*len] = c;
-        (*len)++;
-    }
-
-    return str;
-}
 
 int
 main(void)
 {
-    char *str;
-    int len = 0;
+    long long num = 0;
+    int printable = 0;
+    int err = 0;
 
-    while ((str = read_str(&len)) != NULL) {
-        long long num = 0;
-        int n = 0;
-        int err = 0;
-        int null_ch = 0;
+    int c;
 
-        printf("%s %d\n", str, len);
+    while ((c = getc(stdin)) != EOF) {
+        if (c == '\n' || c == ' ') {
+            if (printable && !err) {
+                printf("%lld\n", num);
+            }
 
-        if (len == 0) {
-            continue;
-        }
+            num = 0;
+            printable = 0;
+            err = 0;
+        } else if (!err) {
+            int n = 0;
 
-        for (int i = 0; i < len; i++) {
-            switch (str[i]) {
+            switch (c) {
             case '1':
                 n = 1;
                 break;
@@ -69,39 +40,31 @@ main(void)
             case 'a':
                 n = -1;
                 break;
-            case '\0':
-                null_ch = 1;
-                break;
             default:
                 err = 1;
             }
 
-            if (err || null_ch) {
-                break;
-            }
-
-            if (__builtin_mul_overflow(num, BASE, &num)) {
-                if (__builtin_add_overflow(num, 1, &num)) {
-                    n--;
+            if (!err && __builtin_mul_overflow(num, BASE, &num)) {
+                if (__builtin_add_overflow(num, 1, &num) && n == '1') {
+                    printf("%lld\n", LLONG_MIN);
                 } else {
                     printf("%s\n", ERR);
-                    err = 1;
-                    break;
+                    printable = 0;
                 }
-            }
 
-            if (__builtin_add_overflow(num, n, &num)) {
-                printf("%s\n", ERR);
                 err = 1;
-                break;
+            }
+
+            if (!err && __builtin_add_overflow(num, n, &num)) {
+                printf("%s\n", ERR);
+                printable = 0;
+                err = 1;
+            }
+
+            if (!err) {
+                printable = 1;
             }
         }
-
-        if (!err) {
-            printf("%lld\n", num);
-        }
-
-        free(str);
     }
 
     return 0;

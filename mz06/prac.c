@@ -82,28 +82,31 @@ void f3(int argc, char **argv)
     printf("%d\n", cnt);
 }
 
-void f4(int argc, char **argv)
+int get_time(FILE *f, struct tm *tt)
 {
-    FILE *f = fopen(argv[1], O_RDONLY);
-    int y, m, d;
-    int hr, min, sec;
-    struct tm tt;
-    struct tm new_tt;
-    memset(&tt, 0, sizeof(tt));
-    fscanf(f, "%d/%d/%d", &tt.tm_year, &tt.tm_mon, &tt.tm_mday);
-    fscanf(f, "%d:%d:%d", &tt.tm_hour, &tt.tm_min, &tt.tm_sec);
-
-    while (fscanf(f, "%d/%d/%d", &tt.tm_year, &tt.tm_mon, &tt.tm_mday) == 1
-        && fscanf(f, "%d:%d:%d", &tt.tm_hour, &tt.tm_min, &tt.tm_sec) == 1) {
-        
-    }
-
-    fclose(f);
+    return fscanf(f, "%d/%d/%d", &tt->tm_year, &tt->tm_mon, &tt->tm_mday) == 3 &&
+        fscanf(f, "%d:%d:%d", &tt->tm_hour, &tt->tm_min, &tt->tm_sec) == 3;
 }
 
 int main(int argc, char **argv)
 {
-    f4(argc, argv);
+    FILE *f = fopen(argv[1], "r");
+
+    struct tm tt;
+    struct tm new_tt;
+    memset(&tt, 0, sizeof(tt));
+    memset(&new_tt, 0, sizeof(new_tt));
+
+    if (!get_time(f, &tt)) {
+        return -1;
+    }
+
+    while (get_time(f, &new_tt)) {
+        printf("%ld\n", mktime(&new_tt) - mktime(&tt));
+        tt = new_tt;
+    }
+
+    fclose(f);
 
     return 0;
 }
