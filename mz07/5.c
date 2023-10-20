@@ -7,7 +7,8 @@
 enum
 {
     YR_OFF = 1900,
-    YR_YDAY = 256,
+    YR_MON = 8, // 256 день в году - 8 августа (если не високосный)
+    YR_MDAY = 12,
 
     FM_MDAY = 26,
     FM_MON = 5,
@@ -15,9 +16,7 @@ enum
     FM_HR = 11,
     FM_MIN = 14,
 
-    M_DAYOFF = 29,
-    M_HROFF = 12,
-    M_MINOFF = 44,
+    PERIOD = ((29 * 24 + 12) * 60 + 44) * 60,
 
     CNT_MONDAY = 4,
     DAY_WEEK = 7
@@ -32,10 +31,14 @@ main(void)
     struct tm tt;
     memset(&tt, 0, sizeof(tt));
     tt.tm_year = y - YR_OFF;
-    tt.tm_mday = 13;
-    tt.tm_mon = 8;
-    tt.tm_isdst = -1;
-    mktime(&tt);
+    tt.tm_mon = YR_MON;
+    tt.tm_mday = YR_MDAY;
+
+    if (y % 4 == 0) { // високосный год
+        tt.tm_mday++;
+    }
+
+    time_t t = timegm(&tt);
 
     struct tm full_moon;
     memset(&full_moon, 0, sizeof(full_moon));
@@ -44,40 +47,27 @@ main(void)
     full_moon.tm_mday = FM_MDAY;
     full_moon.tm_hour = FM_HR;
     full_moon.tm_min = FM_MIN;
-    full_moon.tm_isdst = -1;
-    mktime(&full_moon);
+    time_t fm = timegm(&full_moon);
 
-    if (full_moon.tm_year <= tt.tm_year) {
-        while (full_moon.tm_year < tt.tm_year || full_moon.tm_yday <= tt.tm_yday) {
-            full_moon.tm_mday += M_DAYOFF;
-            full_moon.tm_hour += M_HROFF;
-            full_moon.tm_min += M_MINOFF;
-            mktime(&full_moon);
-        }
-    } else {
-        struct tm new_fm = full_moon;
+    long long diff = (long long) t - (long long) fm;
+    time_t new_fm = t + (PERIOD * (diff > 0) - (diff) % PERIOD);
 
-        while (new_fm.tm_year > tt.tm_year || new_fm.tm_yday > tt.tm_yday) {
-            full_moon = new_fm;
-            new_fm.tm_mday -= M_DAYOFF;
-            new_fm.tm_hour -= M_HROFF;
-            new_fm.tm_min -= M_MINOFF;
-            mktime(&new_fm);
-        }
-    }
+    gmtime_r(&new_fm, &full_moon);
 
     if (full_moon.tm_wday == 0) {
         full_moon.tm_mday -= DAY_WEEK;
     }
 
     full_moon.tm_mday += CNT_MONDAY * DAY_WEEK;
-    mktime(&full_moon);
+    timegm(&full_moon);
 
     if (full_moon.tm_wday == 0) {
         full_moon.tm_mday++;
     } else {
         full_moon.tm_mday -= full_moon.tm_wday - 1;
     }
+
+    timegm(&full_moon);
 
     printf("%04d-%02d-%02d\n", full_moon.tm_year + YR_OFF, full_moon.tm_mon + 1, full_moon.tm_mday);
 
