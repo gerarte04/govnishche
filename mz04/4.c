@@ -28,7 +28,7 @@ convert_from_be(unsigned char *arr)
 }
 
 int
-read_arr(int f, char *arr)
+read_arr(int f, unsigned char *arr)
 {
     for (int i = 0; i < INT_SIZE; i++) {
         int code;
@@ -51,7 +51,7 @@ print_dec(int f, int idx)
     unsigned char arr_left_idx[INT_SIZE];
     unsigned char arr_right_idx[INT_SIZE];
 
-    if (read_arr(f, &arr_key[0]) != 1 || read_arr(f, &arr_left_idx[0]) != 1 || read_arr(f, &arr_right_idx[0]) != 1) {
+    if (read_arr(f, arr_key) != 1 || read_arr(f, arr_left_idx) != 1 || read_arr(f, arr_right_idx) != 1) {
         return;
     }
 

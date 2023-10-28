@@ -11,8 +11,9 @@ int
 check_ext(char *buf)
 {
     int len = strlen(buf);
+    int ext_len = (sizeof(".exe") - 1) / sizeof(".exe"[0]);
 
-    return len >= 4 && strcmp(buf + len - 4, ".exe") == 0;
+    return len >= ext_len && strcmp(buf + len - ext_len, ".exe") == 0;
 }
 
 int
