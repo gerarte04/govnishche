@@ -90,7 +90,7 @@ _Output_
 
 Напишите функцию ```sort_even_odd``` с прототипом.
 
-```
+```c
 void sort_even_odd(size_t count, int *data)
 ```
 

@@ -33,7 +33,7 @@ rwxr-xr-x
 
 Напишите функцию
 
-```
+```c
 int
 parse_rwx_permissions(const char *str);
 ```
@@ -75,7 +75,7 @@ C
 
 Напишите функцию:
 
-```
+```c
 char *relativize_path(const char *path1, const char *path2);
 ```
 
@@ -91,7 +91,7 @@ char *relativize_path(const char *path1, const char *path2);
 
 Напишите функцию:
 
-```
+```c
 int copy_file(const char *srcpath, const char *dstpath);
 ```
 

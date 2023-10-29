@@ -16,7 +16,7 @@
 
 Напишите функцию:
 
-```
+```c
 void normalize_path(char *buf);
 ```
 
@@ -72,7 +72,7 @@ _Output 3_
 
 Дана структура ```s1```:
 
-```
+```c
 struct s1 {
     char f1;
     long long f2;
@@ -84,7 +84,7 @@ struct s1 {
 
 Напишите функцию ```compactify``` с прототипом:
 
-```
+```c
 size_t compactify(void *ptr, size_t size);
 ```
 
@@ -118,7 +118,7 @@ d/e/f/g
 
 Напишите функцию:
 
-```
+```c
 ssize_t getcwd2(int fd, char *buf, size_t size);
 ```
 
