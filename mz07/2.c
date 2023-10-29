@@ -10,7 +10,15 @@ enum
     MON_CNT = 12,
     THURS = 4,
     DAY_WEEK = 7,
-    COEF2 = 2
+    TH_OFF = 2,
+    DAY_DIV = 3
+
+    // YR_OFF - смещение года для хранения в struct tm
+    // MON_CNT - количество месяцев в году
+    // THURS - номер четверга в неделе
+    // DAY_WEEK - количество дней в неделе
+    // TH_OFF - коэфф-т смещения в неделях между вторым и четвертым четвергом
+    // DAY_DIV - делитель для проверки делимости номера дня в месяце
 };
 
 int
@@ -40,14 +48,14 @@ main(void)
         tt.tm_mday += DAY_WEEK;
         mktime(&tt);
 
-        if (tt.tm_mday % 3 != 0) {
+        if (tt.tm_mday % DAY_DIV != 0) {
             printf("%d %d\n", i + 1, tt.tm_mday);
         }
 
-        tt.tm_mday += COEF2 * DAY_WEEK;
+        tt.tm_mday += TH_OFF * DAY_WEEK;
         mktime(&tt);
 
-        if (tt.tm_mday % 3 != 0) {
+        if (tt.tm_mday % DAY_DIV != 0) {
             printf("%d %d\n", i + 1, tt.tm_mday);
         }
     }

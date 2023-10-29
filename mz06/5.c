@@ -12,18 +12,10 @@ getcwd2(int fd, char *buf, size_t size)
 {
     DIR *start = opendir(".");
 
-    if (fchdir(fd) == -1) {
-        goto err;
-    }
-
     struct stat s_fd;
     struct stat s_sl;
 
-    if (lstat("/", &s_sl) != 0) {
-        goto err;
-    }
-
-    if (lstat(".", &s_fd) != 0) {
+    if (fchdir(fd) == -1 || lstat("/", &s_sl) != 0 || lstat(".", &s_fd) != 0) {
         goto err;
     }
 
