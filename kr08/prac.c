@@ -5,7 +5,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-// valgrind --leak-check=full test - поиск утечек динамической памяти
+// valgrind --leak-check=full ./test - поиск утечек динамической памяти
 
 void f1(int argc, char **argv)
 {
