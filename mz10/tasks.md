@@ -18,7 +18,7 @@
 
 В [репозитории](https://gitlab.com/slon/shad-cpp/-/tree/master/gdb-sym) выполните задачу without_symbols. Ответ - значение регистра ```rax``` после 10000-ой итерации цикла (прямо перед ```jne```) в функции ```f()``` - сдавайте в этой задаче. Скрипт oracle.py не используйте.
 
-###Problem mz10-6: gdb-6
+### Problem mz10-6: gdb-6
 
 В [репозитории](https://gitlab.com/slon/shad-cpp/-/tree/master/gdb-sym) выполните задачу with_core. Ответ - ```hashmap[8888][1]``` - сдавайте в этой задаче. Скрипт oracle.py не используйте.
 
