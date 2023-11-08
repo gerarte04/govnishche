@@ -10,10 +10,11 @@
 int
 check_ext(char *buf)
 {
+    const char fmt[] = ".exe";
     int len = strlen(buf);
-    int ext_len = (sizeof(".exe") - 1) / sizeof(".exe"[0]);
+    int ext_len = (sizeof(fmt) - 1) / sizeof(fmt[0]);
 
-    return len >= ext_len && strcmp(buf + len - ext_len, ".exe") == 0;
+    return len >= ext_len && strcmp(buf + len - ext_len, fmt) == 0;
 }
 
 int
