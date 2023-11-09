@@ -20,35 +20,31 @@ enum
     MASK2 = 0x0F,
     MASK3 = 0x3F,
 
-    HYPH_CODE = 62,
-    UNDERL_CODE = 63,
-    UPPER_START = 0,
-    LOWER_START = UPPER_START + ('Z' - 'A' + 1),
-    NUM_START = LOWER_START + ('z' - 'a' + 1),
-    NUM_END = HYPH_CODE - 1,
-    LOWER_END = NUM_START - 1,
-    UPPER_END = LOWER_START - 1,
-    OFFSET_NUM = '0' - NUM_START,
-    OFFSET_LOWER = 'a' - LOWER_START,
-    OFFSET_UPPER = 'A' - UPPER_START,
+    CTABLE_SIZE = 64,
+    UTABLE_SIZE = 123,
 
-    SPACE_CODE = 65,
-    ERR_CODE = 66
+    SPACE = 65,
+    ERR = 66
 };
+
+const char conv_char_table[CTABLE_SIZE] = {
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+    'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+    's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_'};
+
+const uint8_t conv_uint8_table[UTABLE_SIZE] = {
+    ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR,
+    ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR,
+    ERR, ERR, ERR, 62,  ERR, ERR, 52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  ERR, ERR, ERR, ERR, ERR,
+    ERR, ERR, 0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  13,  14,  15,  16,  17,  18,
+    19,  20,  21,  22,  23,  24,  25,  ERR, ERR, ERR, ERR, 63,  ERR, 26,  27,  28,  29,  30,  31,  32,  33,
+    34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51};
 
 char
 convert_uint8(uint8_t n)
 {
-    if (n == HYPH_CODE) {
-        return '-';
-    } else if (n == UNDERL_CODE) {
-        return '_';
-    } else if (n >= NUM_START && n <= NUM_END) {
-        return n + OFFSET_NUM;
-    } else if (n >= LOWER_START && n <= LOWER_END) {
-        return n + OFFSET_LOWER;
-    } else if (n >= UPPER_START && n <= UPPER_END) {
-        return n + OFFSET_UPPER;
+    if (n >= 0 && n < CTABLE_SIZE) {
+        return conv_char_table[n];
     }
 
     return '\0';
@@ -57,21 +53,13 @@ convert_uint8(uint8_t n)
 uint8_t
 convert_char(char c)
 {
-    if (c == '-') {
-        return HYPH_CODE;
-    } else if (c == '_') {
-        return UNDERL_CODE;
-    } else if (c >= '0' && c <= '9') {
-        return c - OFFSET_NUM;
-    } else if (c >= 'a' && c <= 'z') {
-        return c - OFFSET_LOWER;
-    } else if (c >= 'A' && c <= 'Z') {
-        return c - OFFSET_UPPER;
-    } else if (isspace(c)) {
-        return SPACE_CODE;
+    if (isspace(c)) {
+        return SPACE;
+    } else if (c >= 0 && c < UTABLE_SIZE) {
+        return conv_uint8_table[(uint8_t) c];
     }
 
-    return ERR_CODE;
+    return ERR;
 }
 
 char *
@@ -145,10 +133,10 @@ b64u_decode(const char *str, uint8_t **p_data, size_t *p_size)
         while (cnt_strd < DSTK_SIZE && i < len) {
             if (i < len - cnt_strd) {
                 stk[cnt_strd] = convert_char(str[cnt_strd]);
-                if (stk[cnt_strd] == SPACE_CODE) {
+                if (stk[cnt_strd] == SPACE) {
                     i++;
                     str++;
-                } else if (stk[cnt_strd] == ERR_CODE) {
+                } else if (stk[cnt_strd] == ERR) {
                     free(data);
                     return 0;
                 } else {
