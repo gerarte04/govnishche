@@ -93,7 +93,7 @@ type payload struct {
 
     ```
     type timer_cmd_body struct {
-      timestamp varuint
+        timestamp varuint
     };
     ```
 
