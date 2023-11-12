@@ -6,6 +6,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+// решение на 270/300 баллов
+
 int
 main(int argc, char **argv)
 {
