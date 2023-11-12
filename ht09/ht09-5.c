@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 
 enum
@@ -7,7 +8,7 @@ enum
     SIGNIF_LEN = 7,
     MASK_HIGH = 0x7F,
     HIGH_BIT = 1u << 7,
-    MAX_SHIFT = 57
+    MAX_SHIFT = 63,
 };
 
 struct ReadContext
@@ -60,20 +61,22 @@ uleb128_decode(struct ReadContext *cntx)
 
     int shift = 0;
     int end;
+    uint8_t signif;
 
     do {
-        uint8_t signif = *buf & MASK_HIGH;
+        signif = *buf & MASK_HIGH;
 
-        if ((signif == 0 && len != 0) || shift > MAX_SHIFT) {
+        if (shift == MAX_SHIFT && *buf > 1) {
             return 0;
         }
 
-        num |= signif << shift;
+        num |= (uint64_t) signif << shift;
         shift += SIGNIF_LEN;
         len++;
+
     } while ((end = *buf++ >> SIGNIF_LEN) && len < size);
 
-    if (end) {
+    if (end || (signif == 0 && len > 1)) {
         return 0;
     }
 
@@ -81,19 +84,4 @@ uleb128_decode(struct ReadContext *cntx)
     cntx->pos += len;
 
     return 1;
-}
-
-int main(void)
-{
-    uint8_t arr[1] = { 1 };
-
-    struct ReadContext rc = { arr, 2, 1, 0 };
-
-    printf("%d\n", uleb128_decode(&rc));
-    printf("%ld\n", rc.value_u64);
-
-    printf("%d\n", uleb128_decode(&rc));
-    printf("%ld\n", rc.value_u64);
-
-    return 0;
 }
