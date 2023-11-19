@@ -24,13 +24,11 @@ main(int argc, char **argv)
 
                 char *fmt = (i == 1) ? "%d\n" : "%d ";
                 printf(fmt, i);
-                fflush(stdout);
 
                 exit(0);
             }
         } else {
             printf("%d ", i);
-            fflush(stdout);
         }
     }
 

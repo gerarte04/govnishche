@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+// решение на 270/300 баллов
+
 int
 check_ext(char *buf)
 {
