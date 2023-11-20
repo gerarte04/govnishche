@@ -3,10 +3,11 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-void wait_all(int *cnt)
+void
+wait_all(int *cnt)
 {
     int st;
-    
+
     while (wait(&st) != -1) {
         if (WIFEXITED(st) && !WEXITSTATUS(st)) {
             (*cnt)++;

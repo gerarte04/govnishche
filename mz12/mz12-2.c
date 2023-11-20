@@ -2,7 +2,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int forkexec(char *cmd)
+int
+forkexec(char *cmd)
 {
     pid_t pid = fork();
 
@@ -23,5 +24,5 @@ int forkexec(char *cmd)
 int
 main(int argc, char **argv)
 {
-    return (forkexec(argv[1]) || forkexec(argv[2])) && forkexec(argv[3]);
+    return !((forkexec(argv[1]) || forkexec(argv[2])) && forkexec(argv[3]));
 }

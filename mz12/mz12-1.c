@@ -9,7 +9,9 @@ enum
     ERR = 42
 };
 
-int main(int argc, char **argv) {
+int
+main(int argc, char **argv)
+{
     pid_t pid = fork();
 
     if (pid < 0) {
@@ -24,14 +26,14 @@ int main(int argc, char **argv) {
         }
 
         close(fd);
-        fd = open(argv[3], O_WRONLY | O_CREAT | O_APPEND, 0644);
+        fd = open(argv[3], O_WRONLY | O_CREAT | O_APPEND, 0660);
 
         if (fd < 0 || dup2(fd, 1) < 0) {
             exit(ERR);
         }
 
         close(fd);
-        fd = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        fd = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0660);
 
         if (fd < 0 || dup2(fd, 2) < 0) {
             exit(ERR);
