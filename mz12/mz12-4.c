@@ -1,14 +1,12 @@
+#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/file.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 int
 main(int argc, char **argv)
 {
-    char name[] = "script";
-
     char *env = getenv("XDG_RUNTIME_DIR");
 
     if (!env) {
@@ -19,27 +17,32 @@ main(int argc, char **argv)
         }
     }
 
+    char name[PATH_MAX];
+    snprintf(name, PATH_MAX, "%s/multscript-%d", env, getpid());
+
     char *const envp[] = {env, NULL};
 
     char buf[] = "#! /usr/bin/python3\n"
                  "import sys\n"
+                 "import os\n"
                  "res = 1\n"
                  "for x in sys.argv[1:]:\n"
-                 "  res *= int(x)\n\n"
-                 "print(res)\n";
+                 "  res *= int(x)\n"
+                 "print(res)\n"
+                 "os.remove(\'";
 
     int fd = open(name, O_CREAT | O_WRONLY | O_TRUNC, 0700);
-    dprintf(fd, "%s", buf);
-    close(fd);
 
-    if (!fork()) {
-        execve(name, argv, envp);
+    if (dprintf(fd, "%s%s\')\n", buf, name) < 0) {
+        close(fd);
         unlink(name);
+
         exit(1);
     }
+    
+    close(fd);
 
-    wait(NULL);
+    execve(name, argv, envp);
     unlink(name);
-
-    return 0;
+    exit(1);
 }
