@@ -9,7 +9,8 @@ enum
     BASE = 10
 };
 
-void ping(int *fd1, int *fd2, int x_max, int n_prc)
+void
+ping(int *fd1, int *fd2, int x_max, int n_prc)
 {
     close(fd1[1]);
     close(fd2[0]);
@@ -20,14 +21,14 @@ void ping(int *fd1, int *fd2, int x_max, int n_prc)
     int x;
 
     while (fscanf(fr, "%d", &x) != -1) {
-        printf("%d %d\n", n_prc, x);
-        fflush(stdout);
-
         if (x == x_max) {
             fclose(fr);
             fclose(fw);
             exit(0);
         }
+
+        printf("%d %d\n", n_prc, x);
+        fflush(stdout);
 
         x++;
 
@@ -38,7 +39,8 @@ void ping(int *fd1, int *fd2, int x_max, int n_prc)
     exit(0);
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     int x_max = strtol(argv[1], NULL, BASE);
 
