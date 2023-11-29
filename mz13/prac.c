@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     int nproc = strtol(argv[1], NULL, 10);
     int xmax = strtol(argv[2], NULL, 10);
 
-    int semid = semget(IPC_PRIVATE, 10, IPC_CREAT | 0600);
+    int semid = semget(IPC_PRIVATE, nproc, IPC_CREAT | 0600);
     int shmid = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | 0600);
     
     int *x = shmat(shmid, NULL, 0);
