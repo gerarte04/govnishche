@@ -1,6 +1,5 @@
 #include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 
 enum
@@ -13,23 +12,28 @@ volatile int n = 0;
 void
 handler(int sig)
 {
+    signal(SIGHUP, handler);
+
     if (n == MAX_CNT) {
-        exit(0);
+        signal(SIGHUP, SIG_DFL);
+        _exit(0);
     }
 
     printf("%d\n", n);
     fflush(stdout);
 
     n++;
+
+    return;
 }
 
 int
 main(int argc, char **argv)
 {
+    signal(SIGHUP, handler);
+
     printf("%d\n", getpid());
     fflush(stdout);
-
-    sigaction(SIGHUP, &(struct sigaction) { .sa_handler = handler, .sa_flags = SA_RESTART }, NULL);
 
     for (;;) {
         pause();

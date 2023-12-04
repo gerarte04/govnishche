@@ -12,8 +12,10 @@ enum
 
 volatile int work = 0;
 
-void handler(int sig)
+void
+handler(int sig)
 {
+    signal(SIGUSR1, handler);
     work = 1;
 }
 
@@ -72,7 +74,7 @@ main(int argc, char **argv)
     pipe(fd);
 
     pid_t pid1, pid2;
-    sigaction(SIGUSR1, &(struct sigaction) {.sa_handler = handler, .sa_flags = SA_RESTART }, NULL);
+    signal(SIGUSR1, handler);
 
     if (!(pid1 = fork())) {
         ping(fd, x_max, 1);
@@ -93,6 +95,8 @@ main(int argc, char **argv)
 
     printf("Done\n");
     fflush(stdout);
+
+    signal(SIGUSR1, SIG_DFL);
 
     return 0;
 }

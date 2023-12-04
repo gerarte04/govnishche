@@ -12,14 +12,14 @@ enum
     BASE = 10
 };
 
-int
+void
 runexec(char *file)
 {
     char name[PATH_MAX];
 
-    int fd = open(file, O_RDONLY);
-    read(fd, name, PATH_MAX * sizeof(name[0]));
-    close(fd);
+    FILE *f = fopen(file, "r");
+    fgets(name, PATH_MAX, f);
+    fclose(f);
     name[strlen(name) - 1] = '\0';
 
     if (!fork()) {
