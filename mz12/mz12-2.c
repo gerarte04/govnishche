@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 int
-forkexec(char *cmd)
+forkexec(const char *cmd)
 {
     pid_t pid = fork();
 
@@ -13,6 +13,7 @@ forkexec(char *cmd)
 
     if (pid == 0) {
         execlp(cmd, cmd, NULL);
+        _exit(1);
     }
 
     int st;
