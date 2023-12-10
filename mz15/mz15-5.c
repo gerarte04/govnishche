@@ -25,7 +25,6 @@ handler_sigterm(int sig)
 void
 handler_sigrtmin(int sig)
 {
-    printf("received sigrtmin\n");
     nfile++;
     rcvd_rfile = 1;
 }
