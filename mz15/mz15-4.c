@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ipc.h>
@@ -28,10 +29,25 @@ main(int argc, char **argv)
 
     int msqid = msgget(key, IPC_CREAT | 0600);
     int msgsz = sizeof(struct msg) - sizeof(long);
-    msgsnd(msqid, &(struct msg) {1, value1, value2}, msgsz, 0);
+
+    pid_t pids[n];
 
     for (int i = 0; i < n; i++) {
-        if (!fork()) {
+        pids[i] = fork();
+
+        if (pids[i] < 0) {
+            for (int j = 0; j < i; j++) {
+                kill(pids[j], SIGKILL);
+            }
+
+            while (wait(NULL) != -1) {
+            }
+
+            msgctl(msqid, IPC_RMID, NULL);
+            _exit(1);
+        }
+
+        if (!pids[i]) {
             struct msg m;
 
             while (msgrcv(msqid, &m, msgsz, i + 1, 0) >= 0) {
@@ -44,12 +60,14 @@ main(int argc, char **argv)
                     _exit(0);
                 }
 
-                msgsnd(msqid, &(struct msg) {x3 % n + 1, m.x2, x3}, msgsz, 0);
+                msgsnd(msqid, &(struct msg){x3 % n + 1, m.x2, x3}, msgsz, 0);
             }
 
             _exit(0);
         }
     }
+
+    msgsnd(msqid, &(struct msg){1, value1, value2}, msgsz, 0);
 
     while (wait(NULL) != -1) {
     }

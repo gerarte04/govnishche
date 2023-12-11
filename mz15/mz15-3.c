@@ -11,17 +11,29 @@ enum
 };
 
 int
+mod(int a, int b)
+{
+    int m = a % b;
+
+    if (m < 0) {
+        return m + b;
+    }
+
+    return m;
+}
+
+int
 main(int argc, char **argv)
 {
     int nproc = strtol(argv[1], NULL, BASE);
     int semid = semget(IPC_PRIVATE, nproc, IPC_CREAT | 0600);
-    semop(semid, &(struct sembuf) {0, 1, 0}, 1);
+    semop(semid, &(struct sembuf){0, 1, 0}, 1);
 
     setbuf(stdin, 0);
 
     for (int i = 0; i < nproc; i++) {
         if (!fork()) {
-            while (semop(semid, &(struct sembuf) {i, -1, 0}, 1) >= 0) {
+            while (semop(semid, &(struct sembuf){i, -1, 0}, 1) >= 0) {
                 int n;
 
                 if (scanf("%d", &n) == EOF) {
@@ -32,7 +44,7 @@ main(int argc, char **argv)
                 printf("%d %d\n", i, n);
                 fflush(stdout);
 
-                semop(semid, &(struct sembuf) {n % nproc, 1, 0}, 1);
+                semop(semid, &(struct sembuf){mod(n, nproc), 1, 0}, 1);
             }
 
             _exit(0);

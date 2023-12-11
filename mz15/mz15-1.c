@@ -11,7 +11,8 @@ enum
     BASE = 10
 };
 
-int calc_expr(int val, int nproc)
+int
+calc_expr(int val, int nproc)
 {
     int part = val % nproc;
     int res = part;
@@ -38,11 +39,11 @@ main(int argc, char **argv)
     prev = val + 1;
     *val = *prev = 0;
 
-    semop(semid, &(struct sembuf) {0, 1, 0}, 1);
+    semop(semid, &(struct sembuf){0, 1, 0}, 1);
 
     for (int i = 0; i < nproc; i++) {
         if (!fork()) {
-            while (semop(semid, &(struct sembuf) {i, -1, 0}, 1) >= 0) {
+            while (semop(semid, &(struct sembuf){i, -1, 0}, 1) >= 0) {
                 printf("%d %d %d\n", i + 1, *val, *prev);
                 fflush(stdout);
 
@@ -55,7 +56,7 @@ main(int argc, char **argv)
                 (*val)++;
                 *prev = i + 1;
 
-                semop(semid, &(struct sembuf) {calc_expr(*val, nproc), 1, 0}, 1);
+                semop(semid, &(struct sembuf){calc_expr(*val, nproc), 1, 0}, 1);
             }
 
             _exit(0);

@@ -41,8 +41,8 @@ main(int argc, char **argv)
     sigset_t s1;
     sigemptyset(&s1);
 
-    sigaction(SIGTERM, &(struct sigaction) {.sa_handler = handler_sigterm, .sa_flags = SA_RESTART}, NULL);
-    sigaction(SIGRTMIN, &(struct sigaction) {.sa_handler = handler_sigrtmin, .sa_flags = SA_RESTART}, NULL);
+    sigaction(SIGTERM, &(struct sigaction){.sa_handler = handler_sigterm, .sa_flags = SA_RESTART}, NULL);
+    sigaction(SIGRTMIN, &(struct sigaction){.sa_handler = handler_sigrtmin, .sa_flags = SA_RESTART}, NULL);
 
     long long sum[BSIZE] = {};
     int fd = open(argv[1], O_RDONLY);
@@ -50,7 +50,7 @@ main(int argc, char **argv)
     printf("%d\n", getpid());
 
     while (!rcvd_pnums) {
-        int status = ppoll(&(struct pollfd) { fd, POLLIN, 0 }, 1, NULL, &s1);
+        int status = ppoll(&(struct pollfd){fd, POLLIN, 0}, 1, NULL, &s1);
 
         if (rcvd_rfile) {
             close(fd);
