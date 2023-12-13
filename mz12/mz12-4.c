@@ -2,7 +2,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/file.h>
+#include <time.h>
 #include <unistd.h>
+
+enum
+{
+    LET_CNT = 26,
+    NAME_LEN = 50
+};
+
+char *
+generate_name(char *name, int len)
+{
+    srand(time(NULL));
+
+    for (int i = 0; i < len; i++) {
+        name[i] = 'a' + rand() % LET_CNT;
+    }
+
+    return name;
+}
 
 int
 main(int argc, char **argv)
@@ -18,7 +37,8 @@ main(int argc, char **argv)
     }
 
     char name[PATH_MAX];
-    snprintf(name, PATH_MAX, "%s/multscript-%d", env, getpid());
+    char buf1[NAME_LEN];
+    snprintf(name, PATH_MAX, "%s/%s%d", env, generate_name(buf1, NAME_LEN), getpid());
 
     char *const envp[] = {env, NULL};
 
@@ -39,7 +59,7 @@ main(int argc, char **argv)
 
         exit(1);
     }
-    
+
     close(fd);
 
     execve(name, argv, envp);
