@@ -1,3 +1,7 @@
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,54 +19,7 @@ volatile int work = 0;
 void
 handler(int sig)
 {
-    signal(SIGUSR1, handler);
     work = 1;
-}
-
-void
-ping(int *fd, int x_max, int n_prc)
-{
-    while (!work) {
-        pause();
-    }
-
-    FILE *fr = fdopen(fd[0], "r");
-    FILE *fw = fdopen(fd[1], "w");
-
-    int x;
-    pid_t other_prc;
-
-    while (fscanf(fr, "%d %d", &x, &other_prc) != -1) {
-        if (x == x_max) {
-            fprintf(fw, "%d %d\n", x, getpid());
-            fflush(fw);
-
-            fclose(fr);
-            fclose(fw);
-
-            kill(other_prc, SIGUSR1);
-            exit(0);
-        }
-
-        printf("%d %d\n", n_prc, x);
-        fflush(stdout);
-
-        x++;
-
-        fprintf(fw, "%d %d\n", x, getpid());
-        fflush(fw);
-
-        work = 0;
-        kill(other_prc, SIGUSR1);
-
-        while (!work) {
-            pause();
-        }
-    }
-
-    fclose(fr);
-    fclose(fw);
-    exit(0);
 }
 
 int
@@ -72,31 +29,73 @@ main(int argc, char **argv)
 
     int fd[2];
     pipe(fd);
+    FILE *fr = fdopen(fd[0], "r");
+    FILE *fw = fdopen(fd[1], "w");
 
-    pid_t pid1, pid2;
-    signal(SIGUSR1, handler);
+    sigset_t s1, s2;
+    sigemptyset(&s1);
+    sigaddset(&s1, SIGUSR1);
+    sigprocmask(SIG_BLOCK, &s1, NULL);
+    sigemptyset(&s2);
 
-    if (!(pid1 = fork())) {
-        ping(fd, x_max, 1);
+    sigaction(SIGUSR1, &(struct sigaction){.sa_handler = handler, .sa_flags = SA_RESTART}, NULL);
+    pid_t pids[2];
+
+    for (int i = 0; i < 2; i++) {
+        if (!(pids[i] = fork())) {
+            while (!work) {
+                sigsuspend(&s2);
+            }
+
+            work = 0;
+
+            int x;
+            pid_t other_prc;
+
+            while (fscanf(fr, "%d %d", &x, &other_prc) != -1) {
+                if (x == x_max) {
+                    fprintf(fw, "%d %d\n", x, getpid());
+                    fflush(fw);
+
+                    fclose(fr);
+                    fclose(fw);
+
+                    kill(other_prc, SIGUSR1);
+                    _exit(0);
+                }
+
+                printf("%d %d\n", i + 1, x);
+                fflush(stdout);
+
+                x++;
+
+                fprintf(fw, "%d %d\n", x, getpid());
+                fflush(fw);
+
+                kill(other_prc, SIGUSR1);
+
+                while (!work) {
+                    sigsuspend(&s2);
+                }
+
+                work = 0;
+            }
+
+            _exit(0);
+        }
     }
 
-    if (!(pid2 = fork())) {
-        ping(fd, x_max, 2);
-    }
+    fprintf(fw, "1 %d\n", pids[1]);
+    fclose(fr);
+    fclose(fw);
 
-    dprintf(fd[1], "1 %d\n", pid2);
-    close(fd[0]);
-    close(fd[1]);
-
-    kill(pid1, SIGUSR1);
+    kill(pids[0], SIGUSR1);
 
     while (wait(NULL) != -1) {
     }
 
     printf("Done\n");
     fflush(stdout);
-
-    signal(SIGUSR1, SIG_DFL);
 
     return 0;
 }
