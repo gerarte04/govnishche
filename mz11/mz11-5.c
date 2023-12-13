@@ -6,19 +6,8 @@
 int
 main(int argc, char **argv)
 {
-    pid_t pid = fork();
-
-    if (pid < 0) {
-        printf("-1\n");
-        return 0;
-    }
-
-    if (pid) {
-        wait(NULL);
-        return 0;
-    }
-
     int n;
+    int is_parent = 1;
 
     while (scanf("%d", &n) != EOF) {
         pid_t pid = fork();
@@ -26,7 +15,7 @@ main(int argc, char **argv)
         if (pid < 0) {
             printf("-1\n");
             fflush(stdout);
-            exit(1);
+            _exit(1);
         }
 
         if (pid) {
@@ -34,14 +23,20 @@ main(int argc, char **argv)
             wait(&st);
 
             if (!WIFEXITED(st) || WEXITSTATUS(st)) {
-                exit(1);
+                if (is_parent) {
+                    _exit(0);
+                } else {
+                    _exit(1);
+                }
             }
 
             printf("%d\n", n);
             fflush(stdout);
 
-            exit(0);
+            _exit(0);
         }
+
+        is_parent = 0;
     }
 
     return 0;

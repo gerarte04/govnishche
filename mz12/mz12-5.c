@@ -3,7 +3,26 @@
 #include <stdlib.h>
 #include <sys/file.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
+
+enum
+{
+    LET_CNT = 26,
+    NAME_LEN = 50
+};
+
+char *
+generate_name(char *name, int len)
+{
+    srand(time(NULL));
+    
+    for (int i = 0; i < len; i++) {
+        name[i] = 'a' + rand() % LET_CNT;
+    }
+
+    return name;
+}
 
 int
 main(int argc, char **argv)
@@ -20,8 +39,9 @@ main(int argc, char **argv)
 
     char cfile_name[PATH_MAX];
     char out_name[PATH_MAX];
-    snprintf(cfile_name, PATH_MAX, "%s/expscript-%d.c", env, getpid());
-    snprintf(out_name, PATH_MAX, "%s/expscript-%d", env, getpid());
+    char buf[NAME_LEN];
+    snprintf(cfile_name, PATH_MAX, "%s/%s%d.c", env, generate_name(buf, NAME_LEN), getpid());
+    snprintf(out_name, PATH_MAX, "%s/%s%d", env, buf, getpid());
 
     char *const envp[] = {env, NULL};
     char *const new_argv[] = {out_name, cfile_name, NULL};
@@ -44,7 +64,7 @@ main(int argc, char **argv)
                   "  return 0;\n"
                   "}\n";
 
-    int fd = open(cfile_name, O_CREAT | O_WRONLY | O_TRUNC, 0700);
+    int fd = open(cfile_name, O_CREAT | O_WRONLY | O_TRUNC, 0600);
 
     if (dprintf(fd, "%s%s%s", buf1, argv[1], buf2) < 0) {
         close(fd);
