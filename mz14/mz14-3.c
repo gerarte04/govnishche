@@ -16,15 +16,18 @@ void
 runexec(char *file)
 {
     char name[PATH_MAX];
+    FILE *f;
 
-    FILE *f = fopen(file, "r");
-    fgets(name, PATH_MAX, f);
+    if ((f = fopen(file, "r")) == NULL || fgets(name, PATH_MAX, f) == NULL) {
+        return;
+    }
+
     fclose(f);
     name[strlen(name) - 1] = '\0';
 
     if (!fork()) {
         execlp(name, name, NULL);
-        exit(1);
+        _exit(1);
     }
 }
 

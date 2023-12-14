@@ -21,7 +21,7 @@ main(int argc, char **argv)
             close(fin);
 
             execlp(argv[1], argv[1], NULL);
-            exit(1);
+            _exit(1);
         }
 
         int st;
@@ -30,17 +30,17 @@ main(int argc, char **argv)
         if (WIFEXITED(st) && !WEXITSTATUS(st)) {
             if (!fork()) {
                 execlp(argv[2], argv[2], NULL);
-                exit(1);
+                _exit(1);
             }
 
             wait(NULL);
         }
 
-        exit(0);
+        _exit(0);
     }
 
     if (!fork()) {
-        int fout = open(argv[5], O_CREAT | O_WRONLY | O_APPEND, 0700);
+        int fout = open(argv[5], O_CREAT | O_WRONLY | O_APPEND, 0600);
         dup2(fout, 1);
         dup2(fd[0], 0);
 
@@ -49,7 +49,7 @@ main(int argc, char **argv)
         close(fout);
 
         execlp(argv[3], argv[3], NULL);
-        exit(1);
+        _exit(1);
     }
 
     close(fd[0]);
