@@ -3,6 +3,8 @@
 #include <sys/file.h>
 #include <unistd.h>
 
+// не тестил
+
 enum
 {
     BSIZE = 512

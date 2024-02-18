@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+// не тестил
+
 int main(int argc, char **argv)
 {
     int *n;

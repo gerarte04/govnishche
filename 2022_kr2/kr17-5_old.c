@@ -6,6 +6,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+// не тестил
+
 int main(int argc, char **argv)
 {
     int n = strtol(argv[1], NULL, 10);

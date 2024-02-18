@@ -1,3 +1,0 @@
-/opt/ejudge/bin/ejudge-fuse --user s02220056 --url https://unicorn.ejudge.ru/cgi-bin/ ~/contest -o use_ino
-openssl dgst -sha256 -sign s02220056.pem -hex < report.txt > sig.txt
-cat sig.txt >> report.txt
